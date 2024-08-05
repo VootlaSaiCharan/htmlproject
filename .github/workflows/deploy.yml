@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd your-repo
+            git pull origin master
+            # Add commands to build and run your application
+            docker build -t my-nginx-app .
+            docker stop my-nginx-app || true
+            docker rm my-nginx-app || true
+            docker run -d -p 80:80 --name my-nginx-app my-nginx-app:latest
+          EOF
