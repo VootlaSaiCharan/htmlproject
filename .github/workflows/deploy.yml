@@ -21,12 +21,21 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -T -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            cd your-repo
+            # Clone the repository if not already present
+            if [ ! -d "your-repo" ]; then
+              git clone https://github.com/VootlaSaiCharan/htmlproject.git
+            fi
+
+            cd htmlproject
             git pull origin master
-            # Add commands to build and run your application
+
+            # Build Docker image
             docker build -t my-nginx-app .
+
+            # Stop and remove existing container if it exists
             docker stop my-nginx-app || true
             docker rm my-nginx-app || true
+
+            # Run the new container
             docker run -d -p 80:80 --name my-nginx-app my-nginx-app:latest
           EOF
-          
