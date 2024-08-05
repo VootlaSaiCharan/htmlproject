@@ -29,3 +29,4 @@ jobs:
             docker rm my-nginx-app || true
             docker run -d -p 80:80 --name my-nginx-app my-nginx-app:latest
           EOF
+          
